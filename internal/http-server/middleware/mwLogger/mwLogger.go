@@ -10,7 +10,8 @@ import (
 
 func New(log *logrus.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		log := log.WithFields(logrus.Fields{
+
+		log := log.WithFields(logrus.Fields{ //Что даёт переназначение? log :=
 			"component": "middleware/logger",
 		})
 

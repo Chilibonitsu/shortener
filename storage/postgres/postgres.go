@@ -19,6 +19,28 @@ type ConnectorDBPostgre struct {
 	db *gorm.DB
 }
 
+type Dbconnector interface {
+	Show()
+	Connect()
+	Close()
+	//все методы
+	//паттерн репозиторий
+}
+
+// ????
+func NewStorageSQLX(db *sqlx.DB) *StorageSQLX { // вместо этого Dbconnector
+	return &StorageSQLX{db: db}
+}
+func (s *StorageSQLX) ConnSQLX() (*sqlx.DB, error) {
+	const op = "storage.postgres.Conn"
+
+	db, err := sqlx.Connect("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable")
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	return db, nil
+}
+
 func NewConnectorPostgreSQL() (*ConnectorDBPostgre, error) {
 	const op = "storage.postgres.NewConnectorPostgreSQL"
 
@@ -112,17 +134,4 @@ func (c *ConnectorDBPostgre) DeleteUrl(id int64) error {
 	}
 
 	return nil
-}
-
-func NewStorageSQLX(db *sqlx.DB) *StorageSQLX {
-	return &StorageSQLX{db: db}
-}
-func (s *StorageSQLX) ConnSQLX() (*sqlx.DB, error) {
-	const op = "storage.postgres.Conn"
-
-	db, err := sqlx.Connect("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable")
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-	return db, nil
 }

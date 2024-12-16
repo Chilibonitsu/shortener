@@ -25,6 +25,7 @@ type Response struct {
 	Url    string
 }
 
+// передавать лог кринж
 func DeleteById(log *logrus.Logger, linksDeleter LinksDeleter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "internal.api.redirect.Redirect"

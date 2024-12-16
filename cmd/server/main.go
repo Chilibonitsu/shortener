@@ -28,6 +28,9 @@ const (
 )
 
 func main() {
+	//лучше не использовать yaml(есть такое мнение)
+	//лучше .env
+	//go build шоб .env сработал
 	os.Setenv("CONFIG_PATH", "C:\\Users\\Aboba\\Desktop\\short-url-api\\config\\local.yaml")
 	fmt.Println(os.Getenv("CONFIG_PATH"))
 	cfg := config.MustLoad()
@@ -92,6 +95,7 @@ func main() {
 	// TODO check postman
 }
 
+// делаем глобалку логгера на уровне пекеджа
 func setupLogger(env string) *logrus.Logger {
 	var log *logrus.Logger = logrus.New()
 
