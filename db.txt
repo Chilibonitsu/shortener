@@ -1,0 +1,5 @@
+create table if not exists url(
+	id integer primary key,
+	alias text not null unique,
+	url text not null
+);
