@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: urls
+
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8082" 
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    #command: --init-file init.sql
+    # лучше ссылку на env файл env_files docker
+    environment:
+      DB_HOST: ${DB_HOST}        
+      DB_PORT: ${DB_PORT}        
+      DB_USER: ${DB_USER}        
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}        
+      POSTGRES_PASSWORD: aboba
+      POSTGRES_USER: postgres
+      POSTGRES_DB=: urlsdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # Используем volume для хранения данных
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Инициализация базы данных с помощью скрипта
+
+volumes:
+  pgdata: 

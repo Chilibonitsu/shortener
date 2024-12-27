@@ -47,19 +47,6 @@ func main() {
 
 		os.Exit(1)
 	}
-	urlToFind := "youtucbe"
-	res, err := db.GetUrl(urlToFind)
-
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"url": urlToFind,
-		}).WithError(err).Error("failed to find url")
-
-	} else {
-		log.WithFields(logrus.Fields{
-			"url": res,
-		}).Info("found url: ")
-	}
 
 	r := chi.NewRouter()
 
