@@ -14,7 +14,6 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /build/server /app/
 COPY --from=builder /build/.env /app/.env
-COPY ./config/local.yaml /app/config/local.yaml
 
 EXPOSE 8001
 

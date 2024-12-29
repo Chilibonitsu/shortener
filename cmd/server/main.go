@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"short-url-api/internal/config"
 	"short-url-api/storage/postgres"
-	"time"
 
+	"short-url-api/internal/config"
 	"short-url-api/internal/http-server/middleware/mwLogger"
 
 	"short-url-api/internal/api/deleteUrl"
@@ -16,8 +15,10 @@ import (
 	getByID "short-url-api/internal/api/getById"
 	"short-url-api/internal/api/save"
 
+	"github.com/caarlos0/env/v11"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,13 +29,20 @@ const (
 )
 
 func main() {
-	os.Setenv("CONFIG_PATH", "C:\\Users\\Aboba\\Desktop\\short-url-api\\config\\local.yaml")
-	fmt.Println(os.Getenv("CONFIG_PATH"))
-	cfg := config.MustLoad()
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("No config file .env", err)
+	}
+
+	cfg := config.Config{}
+	err = env.Parse(&cfg)
+
+	if err != nil {
+		log.Fatal("Failed to parse config ", err)
+	}
 
 	log := setupLogger(cfg.Env)
-
-	//log.Info("starting short-url-api", slog.String("env", cfg.Env))
 
 	log.WithFields(logrus.Fields{
 		"cfg.Env": cfg.Env,
@@ -59,17 +67,16 @@ func main() {
 	r.Post("/url", save.New(log, db))
 	r.Delete("/url/delete/{id_url}", deleteUrl.DeleteById(log, db))
 
-	// TODO http server
 	log.WithFields(logrus.Fields{
-		"address": "localhost", // брать из cfg
+		"address": cfg.HTTPServerAddress, // брать из cfg
 	}).Info("starting server")
 
 	srv := &http.Server{
-		Addr:         "127.0.0.1:80",
+		Addr:         cfg.HTTPServerAddress,
 		Handler:      r,
-		ReadTimeout:  time.Second * 4,
-		WriteTimeout: time.Second * 4,
-		IdleTimeout:  time.Second * 4,
+		ReadTimeout:  cfg.HTTPServerTimeout,
+		WriteTimeout: cfg.HTTPServerTimeout,
+		IdleTimeout:  cfg.HTTPServerIdleTimeout,
 	}
 	if err := srv.ListenAndServe(); err != nil {
 		log.Error(err)
@@ -90,7 +97,7 @@ func setupLogger(env string) *logrus.Logger {
 			FullTimestamp: true,
 			DisableQuote:  true,
 		})
-		//log = setupPrettySlog()
+
 	case envDev:
 		log.SetFormatter(&logrus.JSONFormatter{})
 	case envProd:
@@ -98,33 +105,3 @@ func setupLogger(env string) *logrus.Logger {
 	}
 	return log
 }
-
-//slog logger
-// func setupLogger(env string) *slog.Logger {
-// 	var log *slog.Logger
-// 	switch env {
-// 	case envLocal:
-// 		log = setupPrettySlog()
-// 	case envDev:
-// 		log = slog.New(
-// 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-// 		)
-// 	case envProd:
-// 		log = slog.New(
-// 			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
-// 		)
-// 	}
-// 	return log
-// }
-
-// func setupPrettySlog() *slog.Logger {
-// 	opts := slogpretty.PrettyHandlerOptions{
-// 		SlogOpts: &slog.HandlerOptions{
-// 			Level: slog.LevelDebug,
-// 		},
-// 	}
-
-// 	handler := opts.NewPrettyHandler(os.Stdout)
-
-// 	return slog.New(handler)
-// }

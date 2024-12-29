@@ -1,29 +1,19 @@
 package config
 
-import (
-	"log"
-	"os"
-
-	"github.com/ilyakaznacheev/cleanenv"
-)
+import "time"
 
 type Config struct {
-	Env string `yaml:"env" env-default:"local"`
-}
-
-func MustLoad() *Config {
-	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		log.Fatal("CONFIG_PATH is not set")
-	}
-
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		log.Fatalf("config file does not exist: %s", configPath)
-	}
-	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("cannot read config: %s", err)
-	}
-
-	return &cfg
+	Env                   string        `env:"ENV"`
+	Port                  int           `env:"PORT"`
+	DSN                   string        `env:"DSN"`
+	ConfigPath            string        `env:"CONFIG_PATH"`
+	DBHost                string        `env:"DB_HOST"`
+	DBPort                int           `env:"DB_PORT"`
+	DBUser                string        `env:"DB_USER"`
+	DBPassword            string        `env:"DB_PASSWORD"`
+	DBName                string        `env:"DB_NAME"`
+	SSLMode               string        `env:"SSL_MODE"`
+	HTTPServerAddress     string        `env:"HTTP_SERVER_ADDRESS"`
+	HTTPServerTimeout     time.Duration `env:"HTTP_SERVER_TIMEOUT"`
+	HTTPServerIdleTimeout time.Duration `env:"HTTP_SERVER_IDDLE_TIMEOUT"`
 }

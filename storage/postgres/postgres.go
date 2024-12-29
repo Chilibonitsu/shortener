@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"short-url-api/storage"
 
 	"errors"
@@ -22,9 +23,7 @@ type ConnectorDBPostgre struct {
 func NewConnectorPostgreSQL() (*ConnectorDBPostgre, error) {
 	const op = "storage.postgres.NewConnectorPostgreSQL"
 
-	dsn := "host=localhost port=5432 user=postgres password=aboba dbname=urlsdb sslmode=disable"
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{PrepareStmt: true})
+	db, err := gorm.Open(postgres.Open(os.Getenv("DSN")), &gorm.Config{PrepareStmt: true})
 
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
@@ -67,6 +66,8 @@ func (c *ConnectorDBPostgre) GetUrl(alias string) (string, error) {
 	return url.Url, nil
 }
 func (c *ConnectorDBPostgre) GetAll() ([]storage.Url, error) {
+	//в хроме record not found WHERE alias = 'favicon' ORDER BY "urls"."id" LIMIT 1
+	//???
 	const op = "storage.postgres.GetAll"
 	urls := []storage.Url{}
 
@@ -120,7 +121,7 @@ func NewStorageSQLX(db *sqlx.DB) *StorageSQLX {
 func (s *StorageSQLX) ConnSQLX() (*sqlx.DB, error) {
 	const op = "storage.postgres.Conn"
 
-	db, err := sqlx.Connect("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable")
+	db, err := sqlx.Connect("pgx", os.Getenv("DSN"))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
