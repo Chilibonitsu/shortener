@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"short-url-api/storage"
+	"time"
 
 	"errors"
 
@@ -41,6 +42,7 @@ func (c *ConnectorDBPostgre) SaveUrl(urlToSave string, alias string) (storage.Ur
 	url := storage.Url{
 		Url:   urlToSave,
 		Alias: alias,
+		Exp:   time.Now().Add(10 * time.Second),
 	}
 	//не обработан кейс urlExists
 	query := c.db.Create(&url)
@@ -82,6 +84,23 @@ func (c *ConnectorDBPostgre) GetAll() ([]storage.Url, error) {
 	}
 	return urls, nil
 }
+
+func (c *ConnectorDBPostgre) GetAllExpired() ([]storage.Url, error) {
+	const op = "storage.postgres.GetAllExpired"
+	urls := []storage.Url{}
+	now := time.Now()
+	query := c.db.Find(&urls, "Exp <= ?", now)
+
+	if errors.Is(query.Error, sql.ErrNoRows) {
+		return nil, storage.ErrURLNotFound
+	}
+
+	if query.Error != nil {
+		return nil, fmt.Errorf("%s: %w", op, query.Error)
+	}
+	return urls, nil
+}
+
 func (c *ConnectorDBPostgre) GetById(id int64) (storage.Url, error) {
 	const op = "storage.postgres.GetById"
 	url := storage.Url{}

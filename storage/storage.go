@@ -1,6 +1,9 @@
 package storage
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 var (
 	ErrURLNotFound = errors.New("url not found")
@@ -9,7 +12,8 @@ var (
 )
 
 type Url struct {
-	ID    int64  `gorm:"primaryKey"`
-	Alias string `gorm:"not null;unique;"`
-	Url   string `gorm:"not null"`
+	ID    int64     `gorm:"primaryKey"`
+	Alias string    `gorm:"not null;unique;"`
+	Url   string    `gorm:"not null"`
+	Exp   time.Time `gorm:"not null"`
 }

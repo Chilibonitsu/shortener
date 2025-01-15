@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"short-url-api/internal/api/getByAlias"
 	getByID "short-url-api/internal/api/getById"
 	"short-url-api/internal/api/save"
+	"short-url-api/internal/daemon"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/go-chi/chi/v5"
@@ -56,7 +58,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	r := chi.NewRouter()
+
+	go daemon.TtlDelete(ctx, log, db)
 
 	r.Use(middleware.RequestID, middleware.RealIP, mwLogger.New(log))
 	r.Use(middleware.Recoverer)

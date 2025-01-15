@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 	resp "short-url-api/internal/api/response"
+	"short-url-api/pkg/generateShort"
 	"short-url-api/storage"
-	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -56,7 +56,7 @@ func New(log *logrus.Logger, urlSaver URLSaver) http.HandlerFunc {
 		}
 		alias := req.Alias
 		if alias == "" {
-			alias = time.Now().GoString()
+			alias = generateShort.GenerateShortKey()
 		}
 		url, err := urlSaver.SaveUrl(req.URL, alias)
 
